@@ -21,27 +21,11 @@ stw r0, 0x04 (r1)    ; Stash LR data
 stwu r1, -0x018 (r1) ; Set up stack
 mr r30, r3 ; Vanilla instruction
 
-; Set function parameters
-li r10, 1
-addi r3, r1, 8
-stw r10, 8 (r1)
-
-; Branch to MaskController::getControllerSafe()
-lis r4, 0x02DE
-ori r4, r4, 0x207C
-mtctr r4
-bctrl
-
-; TODO: Read returned data, find face button bit field
-mr r4, r3
-lis r12, 0x1048
-lwzu r8, +0x6450 (r12)
-lis r4, 0x1049
-; lfs f0, 0x27(r3)
-cmpwi r8, 0
-subi r4, r4, 0x49d0
-
-; bne ExitCodecave
+lis r3, GetControllerData@ha
+ori r3, r3, GetControllerData@l
+mtctr r3
+bctrl ; Branch to GetControllerData in patch_ControllerAPI.asm
+bne ExitCodecave
 b PlayEvent
 
 PlayEvent:
