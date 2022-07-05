@@ -26,7 +26,7 @@ int_3:
 .int 0
 mflr r0
 stw r0, 0x0004 (r1) ; Stash LR data in r1
-stwu r1, -0x000C (r1)
+stwu r1, -0x000C (r1) ; Set up stack
 
 lis r12, 0x2d4       ; Vanilla branch instruction
 ori r12, r12, 0x95d8 ; Vanilla branch instruction
@@ -67,8 +67,8 @@ blr
 
 ButtonComboCheck:
 mflr r0
-stw r0, 0x0004 (r1)   ; Stash LR data in r1
-stwu r1, -0x0010 (r1)
+stw r0, 0x0004 (r1)   ; Stash LR data
+stwu r1, -0x0010 (r1) ; Set up stack
 stw r28, 0x0008 (r1)
 mr r30, r3 ; Vanilla instruction
 
@@ -89,29 +89,27 @@ lhz r0, 0x0112 (r4)
 cmpwi r0, 0x6010 ; This will only be equal if L + R + Y are pressed
 bne ResetAndReturn ; Branch here unless r0 = 0x6010, preventing everything after from executing
 
-0x02DDF744 = callEventAddr:
-
-; Load jump address into registers since r3 is free to use
-lis r3, callEventAddr@ha
-addi r3, r3, callEventAddr@l
+; Load jump address into count register
+lis r3, 0x02DD
+ori r3, r3, 0xF744
 mtctr r3
 
 ; Set parameters for function call
-li r3, 0
+li r3, 0                            ; Actor nullptr
 lis r4, SafeStringEventName@ha
 addi r4, r4,  SafeStringEventName@l
 lis r5, SafeStringEntryPoint@ha
 addi r5, r5, SafeStringEntryPoint@l
-li r6, 0
-li r7, 0
+li r6, 0                            ; bool isPauseOtherActors
+li r7, 0                            ; bool skipIsStartableAirCheck
 
 ; Branch to ksys::evt::callEvent()
 bctrl
 
 ResetAndReturn:
 mr r3, r30
-lwz r28, 0x0008 (r1)
+lwz r28, 0x0008 (r1) ; Increment stack
 addi r1, r1, 0x0010
-lwz r0, 0x0004 (r1) ; Retreive stashed LR data
-mtlr r0 ; Retreive stashed LR data
-blr ; Return to vanilla code
+lwz r0, 0x0004 (r1)  ; Retreive stashed LR data
+mtlr r0              ; Retreive stashed LR data
+blr
