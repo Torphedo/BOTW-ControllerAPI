@@ -46,6 +46,7 @@ SafeStringEntryPoint:
 ; Load jump address into count register
 lis r3, 0x02DD
 ori r3, r3, 0xF744
+mtctr r3
 
 ; Set parameters for function call
 li r3, 0                            ; Actor nullptr
