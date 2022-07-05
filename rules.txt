@@ -1,0 +1,7 @@
+[Definition]
+titleIds = 00050000101C9400,00050000101C9500
+name = Event Player
+path = "The Legend of Zelda: Breath of the Wild/Mods/Event Player"
+description = Triggers a custom event when you press L + R + Y.
+version = 6
+default = true
