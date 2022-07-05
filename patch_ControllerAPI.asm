@@ -2,8 +2,8 @@
 moduleMatches = 0x6267bfd0
 .origin = codecave
 
-float_0:
-.float 0.0
+Button_A:
+.float -170141183460469231731687303715884105728.000000
 
 GetControllerData:
 mflr r5
@@ -19,17 +19,28 @@ ori r4, r4, 0x207C
 mtctr r4
 bctrl
 
-; Read controller data
-lis r12, float_0@ha
-cmpwi r3, 0
-lfs f31, float_0@l (r12)
+; Set A button data to f31
+lis r12, Button_A@ha
+lfs f31, Button_A@l (r12)
 
-lfs f0, 0x118(r3)
+; Read controller data
+lfs f0, 0x27(r3)
 fcmpu cr0, f0, f31
-bne ExitCodecave
-lfs f0, 0x11C(r3)
-fcmpu cr0, f0, f31
-bne ExitCodecave
+beq ExitCodecave
 
 mtlr r5
 blr
+
+; Left Stick:
+;    lfs f0, 0x118(r3)
+;    fcmpu cr0, f0, f31
+;    bne ExitCodecave
+;    lfs f0, 0x11C(r3)
+;    fcmpu cr0, f0, f31
+;    bne ExitCodecave
+;
+; A Button:
+;   lfs f0, 0x27(r3)
+;   fcmpu cr0, f0, f31
+;   beq ExitCodecave
+;

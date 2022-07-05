@@ -25,7 +25,6 @@ lis r3, GetControllerData@ha
 ori r3, r3, GetControllerData@l
 mtctr r3
 bctrl ; Branch to GetControllerData in patch_ControllerAPI.asm
-bne ExitCodecave
 b PlayEvent
 
 PlayEvent:
