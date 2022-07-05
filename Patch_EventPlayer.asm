@@ -3,6 +3,18 @@ moduleMatches = 0x6267bfd0
 .origin = codecave
 0x2d5b82c = bla ButtonComboCheck
 
+EventFlowName:
+.string "FaroreFlow"
+SafeStringEventName:
+.int EventFlowName
+.int 0x10263910
+
+EntryPointName:
+.string "Trigger"
+SafeStringEntryPoint:
+.int EntryPointName
+.int 0x10263910
+
 ButtonComboCheck:
 mflr r0
 stw r0, 0x04 (r1)    ; Stash LR data
@@ -29,20 +41,10 @@ lis r4, 0x1049
 cmpwi r8, 0
 subi r4, r4, 0x49d0
 
-bne ResetAndReturn
+; bne ExitCodecave
+b PlayEvent
 
-EventFlowName:
-.string "FaroreFlow"
-SafeStringEventName:
-.int EventFlowName
-.int 0x10263910
-
-EntryPointName:
-.string "Trigger"
-SafeStringEntryPoint:
-.int EntryPointName
-.int 0x10263910
-
+PlayEvent:
 ; Load jump address into count register
 lis r3, 0x02DD
 ori r3, r3, 0xF744
@@ -59,8 +61,9 @@ li r7, 0                            ; bool skipIsStartableAirCheck
 
 ; Branch to ksys::evt::callEvent()
 bctrl
+b ExitCodecave
 
-ResetAndReturn:
+ExitCodecave:
 mr r3, r30
 addi r1, r1, 0x0018  ; Increment stack
 lwz r0, 0x04 (r1)    ; Retreive stashed LR data
