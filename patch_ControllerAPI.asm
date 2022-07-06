@@ -17,9 +17,8 @@ mtctr r4
 bctrl
 
 ; Read controller data
-lwz r4, 0x27 (r3)
-lis r6, 0xff00
-ori r6, r6, 0x0000
+lwz r4, 0x28 (r3)
+li r6, 0
 cmpw cr0, r4, r6
 beq ExitCodecave ; Resets stack and goes back to vanilla code
 
@@ -35,7 +34,7 @@ blr ; Return and play event
 ;    bne ExitCodecave
 ;
 ; A Button:
-;   lfs f0, 0x27(r3)
-;   fcmpu cr0, f0, f31
-;   beq ExitCodecave
-;
+;    lwz r4, 0x28 (r3)
+;    li r6, 0
+;    cmpw cr0, r4, r6
+;    beq ExitCodecave
