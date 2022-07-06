@@ -17,24 +17,35 @@ mtctr r4
 bctrl
 
 ; Read controller data
-lwz r4, 0x28 (r3)
 li r6, 0
+lhz r4, 0x44 (r3) ; Check R
 cmpw cr0, r4, r6
-beq ExitCodecave ; Resets stack and goes back to vanilla code
+beq ExitCodecave
+lhz r4, 0x32 (r3) ; Check ZR
+cmpw cr0, r4, r6
+beq ExitCodecave
+lhz r4, 0x30 (r3) ; Check Y
+cmpw cr0, r4, r6
+beq ExitCodecave
 
 mtlr r5
 blr ; Return and play event
 
-; Left Stick:
-;    lfs f0, 0x118(r3)
-;    fcmpu cr0, f0, f31
-;    bne ExitCodecave
-;    lfs f0, 0x11C(r3)
-;    fcmpu cr0, f0, f31
-;    bne ExitCodecave
-;
-; A Button:
-;    lwz r4, 0x28 (r3)
-;    li r6, 0
-;    cmpw cr0, r4, r6
-;    beq ExitCodecave
+; //////////////////////////////////////////////
+; ||     Button Name     ||     Hex Code      ||
+; ||==========================================||
+; ||          A          ||       0x28        ||
+; ||          B          ||       0x2A        ||
+; ||          X          ||       0x2E        ||
+; ||          Y          ||       0x30        ||
+; ||          L          ||       0x42        ||
+; ||          R          ||       0x44        ||
+; ||          ZL         ||       0x2C        ||
+; ||          ZR         ||       0x32        ||
+; ||   Left Stick Click  ||       0x36        ||
+; ||  Right Stick Click  ||       0x34        ||
+; ||      Select / -     ||   0x3A / 0x40     ||
+; ||      Start / +      ||   0x3C / 0x3E     ||
+; ||      Touchscreen    ||       0x46        ||
+; ||      D-Pad Down     ||       0x4A        ||
+; //////////////////////////////////////////////
