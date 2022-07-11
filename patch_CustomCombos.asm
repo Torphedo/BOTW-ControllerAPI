@@ -11,10 +11,18 @@ EntryPointName:
 .string "Trigger"
 
 CustomCombos:
+; Check if extended memory is enabled, and jump to
+; the appropriate address depending on the result.
+lis r6, 0x6000     ; nop = 60 00 00 00, checking for a patched instruction at 0x0340F320
+lis r3, 0x0340     ; 0x0340 +
+ori r3, r3, 0xF320 ; 0xF320 = 0x0340F320
+lwz r3, 0x0 (r3)   ; Load instruction to be checked
+cmpw cr0, r3, r6   ; Perform nop check
+bla ExtendedMemory
+ori r3, r3, 0xC580
+
 ; Read controller data
 li r6, 0
-lis r3, 0x41BA
-ori r3, r3, 0xC580
 lhz r4, Button_R (r3) ; Check R
 cmpw cr0, r4, r6
 beq ExitCodecave
@@ -102,6 +110,15 @@ SafeStringEntryPoint:
 .int EntryPointName
 .int 0x10263910
 
+ExtendedMemory:
+bne NoExtendedMemory
+lis r3, 0x6AC9
+blr
+
+NoExtendedMemory:
+lis r3, 0x41BA
+blr
+
 PlayEvent:
 mflr r2 ; Stash LR data
 
@@ -172,34 +189,6 @@ storeR4:
 .int 0
 storeR5:
 .int 0
-storeR8:
-.int 0
-storeR9:
-.int 0
-storeR10:
-.int 0
-storeR11:
-.int 0
-storeR12:
-.int 0
-storeR13:
-.int 0
-storeR24:
-.int 0
-storeR25:
-.int 0
-storeR26:
-.int 0
-storeR27:
-.int 0
-storeR28:
-.int 0
-storeR29:
-.int 0
-storeR30:
-.int 0
-storeR31:
-.int 0
 
 Wrapper:
 mflr r7
@@ -217,34 +206,6 @@ lis r6, storeR4@ha
 stw r4, storeR4@l(r6)
 lis r6, storeR5@ha
 stw r5, storeR5@l(r6)
-lis r6, storeR8@ha
-stw r8, storeR8@l(r6)
-lis r6, storeR9@ha
-stw r9, storeR9@l(r6)
-lis r6, storeR10@ha
-stw r10, storeR10@l(r6)
-lis r6, storeR11@ha
-stw r11, storeR11@l(r6)
-lis r6, storeR12@ha
-stw r12, storeR12@l(r6)
-lis r6, storeR13@ha
-stw r13, storeR13@l(r6)
-lis r6, storeR24@ha
-stw r24, storeR24@l(r6)
-lis r6, storeR25@ha
-stw r25, storeR25@l(r6)
-lis r6, storeR26@ha
-stw r26, storeR26@l(r6)
-lis r6, storeR27@ha
-stw r27, storeR27@l(r6)
-lis r6, storeR28@ha
-stw r28, storeR28@l(r6)
-lis r6, storeR29@ha
-stw r29, storeR29@l(r6)
-lis r6, storeR30@ha
-stw r30, storeR30@l(r6)
-lis r6, storeR31@ha
-stw r31, storeR31@l(r6)
 b CustomCombos
 
 ExitCodecave:
@@ -264,34 +225,6 @@ lis r6, storeR4@ha
 lwz r4, storeR4@l(r6)
 lis r6, storeR5@ha
 lwz r5, storeR5@l(r6)
-lis r6, storeR8@ha
-lwz r8, storeR8@l(r6)
-lis r6, storeR9@ha
-lwz r9, storeR9@l(r6)
-lis r6, storeR10@ha
-lwz r10, storeR10@l(r6)
-lis r6, storeR11@ha
-lwz r11, storeR11@l(r6)
-lis r6, storeR12@ha
-lwz r12, storeR12@l(r6)
-lis r6, storeR13@ha
-lwz r13, storeR13@l(r6)
-lis r6, storeR24@ha
-lwz r24, storeR24@l(r6)
-lis r6, storeR25@ha
-lwz r25, storeR25@l(r6)
-lis r6, storeR26@ha
-lwz r26, storeR26@l(r6)
-lis r6, storeR27@ha
-lwz r27, storeR27@l(r6)
-lis r6, storeR28@ha
-lwz r28, storeR28@l(r6)
-lis r6, storeR29@ha
-lwz r29, storeR29@l(r6)
-lis r6, storeR30@ha
-lwz r30, storeR30@l(r6)
-lis r6, storeR31@ha
-lwz r31, storeR31@l(r6)
 lis r6, 0
 lis r7, 0
 mr r31, r4 ; Vanilla instruction
