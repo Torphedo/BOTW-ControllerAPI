@@ -103,7 +103,7 @@ ori r4, r4, 0x207C
 mtctr r4
 bctrl
 
-b CustomCombos
+b ExitCodecave
 
 ExitCodecave:
 

@@ -1,6 +1,7 @@
 [TorphEventPlayer]
 moduleMatches = 0x6267bfd0
 .origin = codecave
+0x02D5B824 = bla Wrapper
 
 ; Set your event name / entry point name here.
 EventFlowName:
@@ -12,6 +13,8 @@ EntryPointName:
 CustomCombos:
 ; Read controller data
 li r6, 0
+lis r3, 0x41BA
+ori r3, r3, 0xC580
 lhz r4, Button_R (r3) ; Check R
 cmpw cr0, r4, r6
 beq ExitCodecave
@@ -99,7 +102,9 @@ SafeStringEntryPoint:
 .int EntryPointName
 .int 0x10263910
 
-EventFnParams:
+PlayEvent:
+mflr r2 ; Stash LR data
+
 ; Set parameters for callEvent() function
 li r3, 0                            ; Actor nullptr
 lis r4, SafeStringEventName@ha
@@ -108,6 +113,16 @@ lis r5, SafeStringEntryPoint@ha
 addi r5, r5, SafeStringEntryPoint@l
 li r6, 0                            ; bool isPauseOtherActors (overridden by eventinfo)
 li r7, 0                            ; bool skipIsStartableAirCheck (overridden by eventinfo)
+
+; Load jump address into count register
+lis r8, 0x02DD
+ori r8, r8, 0xF744
+mtctr r8
+
+; Branch to ksys::evt::callEvent()
+bctrl
+
+mtlr r2
 blr
 
 Button_A = 0x28
@@ -137,3 +152,147 @@ Button_Start_2 = 0x3E
 Button_Touchscreen = 0x46
 Button_DPad_Down = 0x4A
 TimeSinceLastInput = 0x108
+
+
+
+; Wrapper stuff. This basically just saves the contents of every normal
+; register into the codecave's memory, then restores them all at the end.
+
+storeLR:
+.int 0
+storeR0:
+.int 0
+storeR1:
+.int 0
+storeR2:
+.int 0
+storeR3:
+.int 0
+storeR4:
+.int 0
+storeR5:
+.int 0
+storeR8:
+.int 0
+storeR9:
+.int 0
+storeR10:
+.int 0
+storeR11:
+.int 0
+storeR12:
+.int 0
+storeR13:
+.int 0
+storeR24:
+.int 0
+storeR25:
+.int 0
+storeR26:
+.int 0
+storeR27:
+.int 0
+storeR28:
+.int 0
+storeR29:
+.int 0
+storeR30:
+.int 0
+storeR31:
+.int 0
+
+Wrapper:
+mflr r7
+lis r6, storeLR@ha
+stw r7, storeLR@l(r6)
+lis r6, storeR0@ha
+stw r0, storeR0@l(r6)
+lis r6, storeR1@ha
+stw r1, storeR1@l(r6)
+lis r6, storeR2@ha
+stw r2, storeR2@l(r6)
+lis r6, storeR3@ha
+stw r3, storeR3@l(r6)
+lis r6, storeR4@ha
+stw r4, storeR4@l(r6)
+lis r6, storeR5@ha
+stw r5, storeR5@l(r6)
+lis r6, storeR8@ha
+stw r8, storeR8@l(r6)
+lis r6, storeR9@ha
+stw r9, storeR9@l(r6)
+lis r6, storeR10@ha
+stw r10, storeR10@l(r6)
+lis r6, storeR11@ha
+stw r11, storeR11@l(r6)
+lis r6, storeR12@ha
+stw r12, storeR12@l(r6)
+lis r6, storeR13@ha
+stw r13, storeR13@l(r6)
+lis r6, storeR24@ha
+stw r24, storeR24@l(r6)
+lis r6, storeR25@ha
+stw r25, storeR25@l(r6)
+lis r6, storeR26@ha
+stw r26, storeR26@l(r6)
+lis r6, storeR27@ha
+stw r27, storeR27@l(r6)
+lis r6, storeR28@ha
+stw r28, storeR28@l(r6)
+lis r6, storeR29@ha
+stw r29, storeR29@l(r6)
+lis r6, storeR30@ha
+stw r30, storeR30@l(r6)
+lis r6, storeR31@ha
+stw r31, storeR31@l(r6)
+b CustomCombos
+
+ExitCodecave:
+
+lis r6, storeLR@ha
+lwz r7, storeLR@l(r6)
+mtlr r7
+lis r6, storeR0@ha
+lwz r0, storeR0@l(r6)
+lis r6, storeR1@ha
+lwz r1, storeR1@l(r6)
+lis r6, storeR2@ha
+lwz r2, storeR2@l(r6)
+lis r6, storeR3@ha
+lwz r3, storeR3@l(r6)
+lis r6, storeR4@ha
+lwz r4, storeR4@l(r6)
+lis r6, storeR5@ha
+lwz r5, storeR5@l(r6)
+lis r6, storeR8@ha
+lwz r8, storeR8@l(r6)
+lis r6, storeR9@ha
+lwz r9, storeR9@l(r6)
+lis r6, storeR10@ha
+lwz r10, storeR10@l(r6)
+lis r6, storeR11@ha
+lwz r11, storeR11@l(r6)
+lis r6, storeR12@ha
+lwz r12, storeR12@l(r6)
+lis r6, storeR13@ha
+lwz r13, storeR13@l(r6)
+lis r6, storeR24@ha
+lwz r24, storeR24@l(r6)
+lis r6, storeR25@ha
+lwz r25, storeR25@l(r6)
+lis r6, storeR26@ha
+lwz r26, storeR26@l(r6)
+lis r6, storeR27@ha
+lwz r27, storeR27@l(r6)
+lis r6, storeR28@ha
+lwz r28, storeR28@l(r6)
+lis r6, storeR29@ha
+lwz r29, storeR29@l(r6)
+lis r6, storeR30@ha
+lwz r30, storeR30@l(r6)
+lis r6, storeR31@ha
+lwz r31, storeR31@l(r6)
+lis r6, 0
+lis r7, 0
+mr r31, r4 ; Vanilla instruction
+blr
