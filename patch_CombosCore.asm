@@ -2,6 +2,8 @@
 moduleMatches = 0x6267bfd0
 .origin = codecave
 
+0x2d5b82c = bla ComboInit
+
 ; This acts like a C header file. All the functions and
 ; variables are defined here to make the main file more
 ; readable.
@@ -51,7 +53,14 @@ storeR19:
 storeR20:
 .int 0
 
-TorphMain:
+EventName:
+.int 0
+.int 0x10263910
+EntryPoint:
+.int 0
+.int 0x10263910
+
+ComboInit:
 ; Store the state of most registers to codecave variables.
 ; They're restored afterwards, ensuring the game doesn't
 ; crash when returning to vanilla code.
@@ -284,6 +293,26 @@ cmpw cr0, r4, r6
 li r6, 0
 beq Return
 blr
+Check_LS_Vec2f:
+lwz r4, 0x118 (r3) ; Each of these 2 registers will contain 1 axis
+lwz r5, 0x11C (r3) ; vector data for LS. In this case, it will only
+cmpw cr0, r4, r6   ; proceed if the stick is at 0, 0.
+beq Return
+cmpw cr0, r5, r6
+li r6, 0
+beq Return
+blr
+Check_RS_Vec2f:
+lwz r4, 0x123 (r3) ; Each of these 2 registers will contain 1 axis
+lwz r5, 0x127 (r3) ; vector data for RS. In this case, it will only
+cmpw cr0, r4, r6   ; proceed if the stick is at 0, 0.
+beq Return
+cmpw cr0, r5, r6
+li r6, 0
+beq Return
+blr
+
+
 ; Unknown0:
 ; lhz r4, 0x38 (r3) ; Unknown. Exists in same region as other inputs.
 ; cmpw cr0, r4, r6
@@ -305,8 +334,28 @@ blr
 ; beq Return
 ; blr
 
+; There's another set of offsets starting at 0x68, which appear
+; to be in the same order (in memory) as the ones above. These ones appear to increment by 0x222 each
+; frame, which is strange.
+;
+; The bytes at 0x10D and 0x10C will have different values depending on the rotation of the left and
+; right stick respectively, but only if they're past a certain threshold from the center.
+
 Return:
 lis r14, StoreComboLR@ha
 lwz r15, StoreComboLR@l(r14)
 mtlr r15
+blr
+
+Add1:
+addi r16, r16, 0x1 ; Add 1
+sth r16, 0x0(r18)
+b Return
+
+FramesCooldown:
+lis r18, FramesSinceLastJump@ha
+addi r18, r18, FramesSinceLastJump@l ; Load pointer to FramesSinceLastJump
+lhz r16, 0x0(r18)  ; Load value into r16
+cmpw cr0, r16, r17
+blt Add1 ; Add 1 and fail check if counter is less than target value
 blr
