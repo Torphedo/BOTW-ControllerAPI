@@ -2,8 +2,6 @@
 moduleMatches = 0x6267bfd0
 .origin = codecave
 
-0x2d5b82c = bla ComboInit
-
 ; Set your event name / entry point name here.
 FaroreFlowName:
 .string "FaroreFlow"
@@ -66,21 +64,3 @@ bla Check_ZL
 bla Check_Y
 ; Proceed to play event, only if all of the checked buttons are being pressed
 b PlayEvent
-
-PlayEvent:
-li r3, 0                  ; Actor nullptr
-lis r4, EventName@ha      ; Load event name string
-addi r4, r4, EventName@l
-lis r5, EntryPoint@ha     ; Load entry point string
-addi r5, r5, EntryPoint@l
-li r6, 0                  ; bool isPauseOtherActors (overridden by eventinfo)
-li r7, 0                  ; bool skipIsStartableAirCheck (overridden by eventinfo)
-
-; Load jump address into count register
-lis r8, 0x02DD
-ori r8, r8, 0xF744
-mtctr r8
-
-; Branch to ksys::evt::callEvent()
-bctrl
-b ExitCodecave

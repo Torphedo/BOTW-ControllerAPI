@@ -60,6 +60,9 @@ EntryPoint:
 .int 0
 .int 0x10263910
 
+FramesSinceLastUse:
+.short 0
+
 ComboInit:
 ; Store the state of most registers to codecave variables.
 ; They're restored afterwards, ensuring the game doesn't
@@ -166,6 +169,24 @@ lis r4, 0
 lis r5, 0
 mr r30, r3 ; Vanilla instruction
 blr
+
+PlayEvent:
+li r3, 0                  ; Actor nullptr
+lis r4, EventName@ha      ; Load event name string
+addi r4, r4, EventName@l
+lis r5, EntryPoint@ha     ; Load entry point string
+addi r5, r5, EntryPoint@l
+li r6, 0                  ; bool isPauseOtherActors (overridden by eventinfo)
+li r7, 0                  ; bool skipIsStartableAirCheck (overridden by eventinfo)
+
+; Load jump address into count register
+lis r8, 0x02DD
+ori r8, r8, 0xF744
+mtctr r8
+
+; Branch to ksys::evt::callEvent()
+bctrl
+b ExitCodecave
 
 Check_A:
 lhz r4, 0x28 (r3) ; Check A
@@ -353,8 +374,8 @@ sth r16, 0x0(r18)
 b Return
 
 FramesCooldown:
-lis r18, FramesSinceLastJump@ha
-addi r18, r18, FramesSinceLastJump@l ; Load pointer to FramesSinceLastJump
+lis r18, FramesSinceLastUse@ha
+addi r18, r18, FramesSinceLastUse@l ; Load pointer to FramesSinceLastUse
 lhz r16, 0x0(r18)  ; Load value into r16
 cmpw cr0, r16, r17
 blt Add1 ; Add 1 and fail check if counter is less than target value
