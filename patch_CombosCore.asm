@@ -4,55 +4,20 @@ moduleMatches = 0x6267bfd0
 
 0x2d5b82c = bla ComboInit
 
-; This acts like a C header file. All the functions and
-; variables are defined here to make the main file more
-; readable.
-
-; Initialize register storage variables
+; This should be replaced with a stack push/pop in the future.
 StoreComboLR:
 .int 0
 
-storeLR:
-.int 0
-storeR0:
-.int 0
-storeR1:
-.int 0
-storeR2:
-.int 0
-storeR3:
-.int 0
-storeR6:
-.int 0
-storeR7:
-.int 0
-storeR8:
-.int 0
-storeR9:
-.int 0
-storeR10:
-.int 0
-storeR11:
-.int 0
-storeR12:
-.int 0
-storeR13:
-.int 0
-storeR14:
-.int 0
-storeR15:
-.int 0
-storeR16:
-.int 0
-storeR17:
-.int 0
-storeR18:
-.int 0
-storeR19:
-.int 0
-storeR20:
-.int 0
+ControllerPointer:
+.int 0 ; Pointer to controller data
 
+MaskController__getControllerSafe:
+.int 0x02DE207C
+
+ksys__evt__callEvent:
+.int 0x02DDF744
+
+; Empty sead::SafeString structs
 EventName:
 .int 0
 .int 0x10263910
@@ -64,113 +29,110 @@ FramesSinceLastUse:
 .short 0
 
 ComboInit:
-; Store the state of most registers to codecave variables.
-; They're restored afterwards, ensuring the game doesn't
-; crash when returning to vanilla code.
-mflr r5
-lis r4, storeLR@ha
-stw r5, storeLR@l(r4)
-lis r4, storeR0@ha
-stw r0, storeR0@l(r4)
-lis r4, storeR1@ha
-stw r1, storeR1@l(r4)
-lis r4, storeR2@ha
-stw r2, storeR2@l(r4)
-lis r4, storeR3@ha
-stw r3, storeR3@l(r4)
-lis r4, storeR6@ha
-stw r6, storeR6@l(r4)
-lis r4, storeR7@ha
-stw r7, storeR7@l(r4)
-lis r4, storeR8@ha
-stw r8, storeR8@l(r4)
-lis r4, storeR9@ha
-stw r9, storeR9@l(r4)
-lis r4, storeR10@ha
-stw r10, storeR10@l(r4)
-lis r4, storeR11@ha
-stw r11, storeR11@l(r4)
-lis r4, storeR12@ha
-stw r12, storeR12@l(r4)
-lis r4, storeR13@ha
-stw r13, storeR13@l(r4)
-lis r4, storeR14@ha
-stw r14, storeR14@l(r4)
-lis r4, storeR15@ha
-stw r15, storeR15@l(r4)
-lis r4, storeR16@ha
-stw r16, storeR16@l(r4)
-lis r4, storeR17@ha
-stw r17, storeR17@l(r4)
-lis r4, storeR18@ha
-stw r18, storeR18@l(r4)
-lis r4, storeR19@ha
-stw r19, storeR19@l(r4)
-lis r4, storeR20@ha
-stw r20, storeR20@l(r4)
+; Push all general purpose registers and link
+; register to the stack. These will be restored
+; before branching back to the original game code.
+stwu r0, -4(r1)
+stwu r2, -4(r1)
+stwu r3, -4(r1)
+stwu r4, -4(r1)
+stwu r5, -4(r1)
+stwu r6, -4(r1)
+stwu r7, -4(r1)
+stwu r8, -4(r1)
+stwu r9, -4(r1)
+stwu r10, -4(r1)
+stwu r11, -4(r1)
+stwu r12, -4(r1)
+stwu r13, -4(r1)
+stwu r14, -4(r1)
+stwu r15, -4(r1)
+stwu r16, -4(r1)
+stwu r17, -4(r1)
+stwu r18, -4(r1)
+stwu r19, -4(r1)
+stwu r20, -4(r1)
+stwu r21, -4(r1)
+stwu r22, -4(r1)
+stwu r23, -4(r1)
+stwu r24, -4(r1)
+stwu r25, -4(r1)
+stwu r26, -4(r1)
+stwu r27, -4(r1)
+stwu r28, -4(r1)
+stwu r29, -4(r1)
+stwu r30, -4(r1)
+stwu r31, -4(r1)
+mflr r31
+stwu r31, -4(r1)
+
+; Load jump address into count register
+lis r4, MaskController__getControllerSafe@ha
+lwz r3, MaskController__getControllerSafe@l(r4)
+mtctr r3
 
 ; Set function parameters
 li r10, 1
-addi r3, r1, 8
+addi r1, r1, -0xC ; Push stack
+addi r3, r1, 8 ; r3 = &stack + 8 (?)
 stw r10, 8 (r1)
 
 ; Branch to MaskController::getControllerSafe()
-lis r4, 0x02DE
-ori r4, r4, 0x207C
-mtctr r4
 bctrl
+addi r1, r1, 0xC ; Pop stack
 
+; Store pointer to controller data in ControllerPointer variable
+lis r4, ControllerPointer@ha
+stw r3, ControllerPointer@l(r4)
+
+; Branch to user code
 b CheckCombos
 
 ExitCodecave:
-; Restore registers from storage
-lis r4, storeLR@ha
-lwz r5, storeLR@l(r4)
-mtlr r5
-lis r4, storeR0@ha
-lwz r0, storeR0@l(r4)
-lis r4, storeR1@ha
-lwz r1, storeR1@l(r4)
-lis r4, storeR2@ha
-lwz r2, storeR2@l(r4)
-lis r4, storeR3@ha
-lwz r3, storeR3@l(r4)
-lis r4, storeR6@ha
-lwz r6, storeR6@l(r4)
-lis r4, storeR7@ha
-lwz r7, storeR7@l(r4)
-lis r4, storeR8@ha
-lwz r8, storeR8@l(r4)
-lis r4, storeR9@ha
-lwz r9, storeR9@l(r4)
-lis r4, storeR10@ha
-lwz r10, storeR10@l(r4)
-lis r4, storeR11@ha
-lwz r11, storeR11@l(r4)
-lis r4, storeR12@ha
-lwz r12, storeR12@l(r4)
-lis r4, storeR13@ha
-lwz r13, storeR13@l(r4)
-lis r4, storeR14@ha
-lwz r14, storeR14@l(r4)
-lis r4, storeR15@ha
-lwz r15, storeR15@l(r4)
-lis r4, storeR16@ha
-lwz r16, storeR16@l(r4)
-lis r4, storeR17@ha
-lwz r17, storeR17@l(r4)
-lis r4, storeR18@ha
-lwz r18, storeR18@l(r4)
-lis r4, storeR19@ha
-lwz r19, storeR19@l(r4)
-lis r4, storeR20@ha
-lwz r20, storeR20@l(r4)
-lis r4, 0
-lis r5, 0
-mr r30, r3 ; Vanilla instruction
+; Restore registers from stack
+lwzu r31, 0(r1)
+mtlr r31
+lwzu r31, 4(r1)
+lwzu r30, 4(r1)
+lwzu r29, 4(r1)
+lwzu r28, 4(r1)
+lwzu r27, 4(r1)
+lwzu r26, 4(r1)
+lwzu r25, 4(r1)
+lwzu r24, 4(r1)
+lwzu r23, 4(r1)
+lwzu r22, 4(r1)
+lwzu r21, 4(r1)
+lwzu r20, 4(r1)
+lwzu r19, 4(r1)
+lwzu r18, 4(r1)
+lwzu r17, 4(r1)
+lwzu r16, 4(r1)
+lwzu r15, 4(r1)
+lwzu r14, 4(r1)
+lwzu r13, 4(r1)
+lwzu r12, 4(r1)
+lwzu r11, 4(r1)
+lwzu r10, 4(r1)
+lwzu r9,  4(r1)
+lwzu r8,  4(r1)
+lwzu r7,  4(r1)
+lwzu r6,  4(r1)
+lwzu r5,  4(r1)
+lwzu r4,  4(r1)
+lwzu r3,  4(r1)
+lwzu r2,  4(r1)
+lwzu r0,  4(r1)
+addi r1, r1, 4
+mr r30, r3 ; Vanilla instruction. Replace this when you change the hooking address.
 blr
 
 PlayEvent:
+; Load jump address into count register
+lis r4, ksys__evt__callEvent@ha
+lwz r3, ksys__evt__callEvent@l(r4)
+mtctr r3
+
 li r3, 0                  ; Actor nullptr
 lis r4, EventName@ha      ; Load event name string
 addi r4, r4, EventName@l
@@ -178,11 +140,6 @@ lis r5, EntryPoint@ha     ; Load entry point string
 addi r5, r5, EntryPoint@l
 li r6, 0                  ; bool isPauseOtherActors (overridden by eventinfo)
 li r7, 0                  ; bool skipIsStartableAirCheck (overridden by eventinfo)
-
-; Load jump address into count register
-lis r8, 0x02DD
-ori r8, r8, 0xF744
-mtctr r8
 
 ; Branch to ksys::evt::callEvent()
 bctrl
