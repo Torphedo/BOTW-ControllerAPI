@@ -17,7 +17,7 @@ lis r4, ControllerPointer@ha
 lwz r3, ControllerPointer@l(r4)
 
 bla RuneEntry
-b ExitCodecave
+b restore_registers
 
 RuneEntry:
 ; Stash LR data
