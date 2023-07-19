@@ -61,23 +61,24 @@ bool (*ksys__evt__callEvent)(void* actor, sead__SafeString* event_name, sead__Sa
 bool call_event(char* event_name, char* entry_point, bool pause_other_actors, bool skip_IsStartableAir_check) {
   // Create a sead::SafeString for the name and entry point
  	sead__SafeString name_sead = {
- 		.string = event_name,
- 		.sead_vtable = sead_vtable_addr
+ 	  .string = event_name,
+ 	  .sead_vtable = sead_vtable_addr
  	};
  	sead__SafeString entry_point_sead = {
- 		.string = entry_point,
- 		.sead_vtable = sead_vtable_addr
+ 	  .string = entry_point,
+ 	  .sead_vtable = sead_vtable_addr
  	};
  	
  	return ksys__evt__callEvent(NULL, &name_sead, &entry_point_sead, pause_other_actors, skip_IsStartableAir_check);
 }
 
 int main() {
-	static uint32_t controller_index = 1;
-	controller_state* controller = getControllerSafe(&controller_index);
-	if (controller->L && controller->R) {
-		return call_event("FaroreFlow", "Trigger", false, false);
-	}
-	return 0;
+  static uint32_t controller_index = 1;
+  controller_state* controller = getControllerSafe(&controller_index);
+  if (controller->L && controller->R) {
+    return call_event("FaroreFlow", "Trigger", false, false);
+  }
+
+  return 0;
 }
 
